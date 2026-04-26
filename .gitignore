@@ -1,0 +1,22 @@
+# Trading data
+2026/
+*.zip
+*.rpt
+
+# Reference screenshots
+*.jpg
+*.jpeg
+*.png
+
+# Local/runtime files
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+

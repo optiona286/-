@@ -1,0 +1,49 @@
+{
+  "name": "期貨盯盤管家",
+  "short_name": "盯盤管家",
+  "description": "台指期 TX 交易日資料載入、監控波動與回測播放工具。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f7fb",
+  "theme_color": "#075db7",
+  "categories": ["finance", "productivity"],
+  "lang": "zh-Hant-TW",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "監控",
+      "short_name": "監控",
+      "description": "開啟監控波動頁",
+      "url": "./index.html#monitor",
+      "icons": [
+        {
+          "src": "assets/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "回測",
+      "short_name": "回測",
+      "description": "開啟回測控制頁",
+      "url": "./index.html#backtest",
+      "icons": [
+        {
+          "src": "assets/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}

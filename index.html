@@ -1,0 +1,1910 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#075db7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="盯盤管家">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <title>期貨盯盤管家</title>
+  <style>
+    :root {
+      --blue: #137bd2;
+      --blue-dark: #075db7;
+      --blue-soft: #eaf4ff;
+      --bg: #e8eef6;
+      --panel: #ffffff;
+      --line: #d7e0e9;
+      --text: #24364b;
+      --muted: #818b96;
+      --red: #d84f4f;
+      --green: #16a86a;
+      --gray: #f1f5f9;
+      --shadow: 0 10px 24px rgba(22, 54, 86, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      color: inherit;
+      background: transparent;
+    }
+
+    .app {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      background: #fff;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .topbar {
+      background: linear-gradient(90deg, #2d97ec 0%, #0870d1 45%, #075db7 100%);
+      color: #fff;
+      padding: calc(env(safe-area-inset-top) + 6px) 12px 8px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, .06);
+    }
+
+    .top-row {
+      min-height: 38px;
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      opacity: .96;
+    }
+
+    .icon-btn svg,
+    .tab svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .segmented {
+      height: 36px;
+      max-width: 174px;
+      width: 100%;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: 9px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(255,255,255,.14);
+    }
+
+    .segmented button {
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .segmented button.active {
+      background: #fff;
+      color: var(--blue-dark);
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+      background: #f4f7fb;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .quote {
+      background: var(--blue-soft);
+      padding: 12px 14px 9px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .quote-title {
+      font-size: 17px;
+      color: #0d4770;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .quote-line {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: baseline;
+      gap: 7px;
+    }
+
+    .quote-price {
+      font-size: 17px;
+      color: #333;
+    }
+
+    .quote-change {
+      font-size: clamp(30px, 10vw, 42px);
+      line-height: 1;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quote-change small {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .quote-volume {
+      font-size: 15px;
+      color: #5e4634;
+      white-space: nowrap;
+    }
+
+    .up { color: var(--red); }
+    .down { color: var(--green); }
+    .flat { color: #607080; }
+
+    .meta-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 6px 12px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      color: #5b6571;
+      font-size: 14px;
+      scrollbar-width: none;
+    }
+
+    .meta-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .meta-strip b {
+      font-weight: 700;
+    }
+
+    .chart-panel {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #chart {
+      width: 100%;
+      height: clamp(154px, 32dvh, 214px);
+      display: block;
+      background: #fff;
+    }
+
+    .section-title {
+      background: var(--blue-soft);
+      color: #0a66aa;
+      font-size: 18px;
+      padding: 9px 14px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .event-list {
+      background: #fff;
+      min-height: 190px;
+    }
+
+    .playback-panel {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 8px 12px 9px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .playback-panel.hidden {
+      display: none;
+    }
+
+    .playback-mini {
+      display: none;
+      position: fixed;
+      right: 14px;
+      bottom: calc(72px + env(safe-area-inset-bottom));
+      z-index: 25;
+      min-height: 34px;
+      border-radius: 999px;
+      padding: 0 12px;
+      background: rgba(7, 93, 183, .94);
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(7, 55, 102, .24);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .playback-mini.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .playback-collapse {
+      min-height: 28px;
+      border-radius: 7px;
+      padding: 0 9px;
+      border: 1px solid #b8d6ef;
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .playback-top {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .playback-title {
+      font-weight: 800;
+      color: #143f66;
+      font-size: 15px;
+    }
+
+    .playback-time {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .playback-range {
+      width: 100%;
+      height: 18px;
+      accent-color: var(--blue);
+    }
+
+    .playback-controls {
+      display: grid;
+      grid-template-columns: 38px 38px 38px 1fr;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .round-btn {
+      width: 38px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid #b8d6ef;
+      background: #f8fbff;
+      color: var(--blue-dark);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .round-btn.primary-control {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .speed-select {
+      width: 100%;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      color: #173f64;
+      padding: 0 8px;
+      background: #fff;
+    }
+
+    .notify-strip {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding-top: 0;
+      color: #596777;
+      font-size: 12px;
+    }
+
+    .notify-strip .secondary {
+      min-height: 30px;
+      border-radius: 7px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .event-row {
+      min-height: 54px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .event-main {
+      font-size: 18px;
+      line-height: 1.25;
+      min-width: 0;
+      font-weight: 700;
+    }
+
+    .event-sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .event-time {
+      text-align: right;
+      color: #303842;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .empty {
+      padding: 26px 20px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .panel {
+      background: #fff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      margin-top: 10px;
+      padding: 15px 16px;
+    }
+
+    #page-monitor .panel {
+      margin-top: 0;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 19px;
+      font-weight: 700;
+      color: #173f64;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      color: #596777;
+      font-size: 14px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .tiny-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #75b7ee;
+      box-shadow: 0 0 0 3px rgba(19, 123, 210, .12);
+    }
+
+    .primary {
+      min-height: 44px;
+      width: 100%;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #238be3, #0d6fc6);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    .secondary {
+      min-height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--blue);
+      color: var(--blue-dark);
+      padding: 0 12px;
+      font-weight: 700;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row-title {
+      font-size: 17px;
+      color: #193f63;
+      font-weight: 700;
+    }
+
+    .row-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .switch {
+      width: 58px;
+      height: 32px;
+      border-radius: 99px;
+      background: #ccd5df;
+      padding: 3px;
+      transition: .2s;
+      flex: 0 0 auto;
+    }
+
+    .switch span {
+      display: block;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #fff;
+      transition: .2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,.18);
+    }
+
+    .switch.on {
+      background: #5aa3e9;
+    }
+
+    .switch.on span {
+      transform: translateX(26px);
+    }
+
+    .checks {
+      display: grid;
+      gap: 8px;
+    }
+
+    .check-row {
+      display: grid;
+      grid-template-columns: 1fr 58px 58px;
+      align-items: center;
+      gap: 8px;
+      min-height: 46px;
+      border-bottom: 1px solid var(--line);
+      color: #173f64;
+    }
+
+    .check-row.head {
+      color: #6b7480;
+      font-size: 15px;
+      min-height: 34px;
+      border-bottom-color: #7e8b96;
+    }
+
+    .box {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto;
+      border-radius: 7px;
+      border: 2px solid #8fc0ec;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .box.on {
+      border-color: #5aa3e9;
+      background: #5aa3e9;
+    }
+
+    .data-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: var(--gray);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #e5ebf1;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 20px;
+      color: #123e64;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .day-list {
+      background: #fff;
+      border-top: 1px solid var(--line);
+      margin-top: 12px;
+    }
+
+    .day-row {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .day-row button {
+      color: var(--blue-dark);
+      font-weight: 700;
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 99px;
+      background: var(--gray);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: var(--blue);
+      transition: width .2s;
+    }
+
+    .tabs {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      height: calc(60px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: #fff;
+      border-top: 1px solid #b8c2cc;
+      z-index: 20;
+    }
+
+    .tab {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 2px;
+      color: #8a929b;
+      font-size: 12px;
+    }
+
+    .tab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .tab.active {
+      color: var(--blue-dark);
+      font-weight: 700;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(86px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(calc(100vw - 28px), 402px);
+      background: rgba(24, 34, 46, .94);
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: none;
+      z-index: 30;
+      line-height: 1.5;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @media (max-height: 740px) {
+      #chart {
+        height: clamp(132px, 27dvh, 180px);
+      }
+
+      .quote {
+        padding-top: 9px;
+        padding-bottom: 7px;
+      }
+
+      .quote-title {
+        font-size: 16px;
+      }
+
+      .quote-change {
+        font-size: clamp(28px, 9vw, 38px);
+      }
+
+      .playback-panel {
+        padding-top: 6px;
+        padding-bottom: 7px;
+      }
+
+      .section-title {
+        font-size: 17px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .quote-line {
+        grid-template-columns: 1fr;
+        gap: 3px;
+      }
+
+      .quote-change {
+        text-align: left;
+      }
+
+      .playback-controls {
+        grid-template-columns: 36px 36px 36px 1fr;
+      }
+
+      .round-btn {
+        width: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="top-row">
+        <button class="icon-btn" id="settingsShortcut" aria-label="設定">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.36a1.7 1.7 0 0 0-1 .58V20a2 2 0 1 1-4 0v-.08a1.7 1.7 0 0 0-1-.58 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.64 15a1.7 1.7 0 0 0-.58-1H4a2 2 0 1 1 0-4h.08a1.7 1.7 0 0 0 .58-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.64a1.7 1.7 0 0 0 1-.58V4a2 2 0 1 1 4 0v.08a1.7 1.7 0 0 0 1 .58 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.36 9c.22.36.42.72.58 1H20a2 2 0 1 1 0 4h-.08a1.7 1.7 0 0 0-.52 1Z"/></svg>
+        </button>
+        <div class="segmented" id="sessionSwitch">
+          <button data-session="day" class="active">早盤</button>
+          <button data-session="night">晚盤</button>
+        </div>
+        <button class="icon-btn" id="dataShortcut" aria-label="資料">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="page active" id="page-monitor">
+        <div class="quote">
+          <div class="quote-title" id="quoteTitle">台股期貨早盤</div>
+          <div class="quote-line">
+            <div class="quote-price">成交 <span id="lastPrice">--</span></div>
+            <div class="quote-change flat" id="quoteChange">-- <small></small></div>
+            <div class="quote-volume">量 <span id="sessionVolume">--</span> 口</div>
+          </div>
+        </div>
+        <div class="meta-strip">
+          <span>開 <b id="openPrice">--</b></span>
+          <span>高 <b id="highPrice">--</b></span>
+          <span>低 <b id="lowPrice">--</b></span>
+          <span>參考 <b id="refPrice">--</b></span>
+          <span>契約 <b id="contractName">--</b></span>
+        </div>
+        <div class="chart-panel">
+          <svg id="chart" viewBox="0 0 390 250" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="playback-panel">
+          <div class="playback-top">
+            <div class="playback-title" id="playbackTitle">回測播放</div>
+            <div class="playback-time" id="playbackTime">尚未選擇交易日</div>
+            <button class="playback-collapse" id="collapsePlayback">隱藏</button>
+          </div>
+          <input class="playback-range" id="playbackRange" type="range" min="0" max="0" value="0">
+          <div class="playback-controls">
+            <button class="round-btn primary-control" id="playPauseBtn" aria-label="播放或暫停">▶</button>
+            <button class="round-btn" id="stepBtn" aria-label="前進一段">›</button>
+            <button class="round-btn" id="fastBtn" aria-label="快進">»</button>
+            <select class="speed-select" id="speedSelect" aria-label="回測秒數">
+              <option value="1">每次 1 秒</option>
+              <option value="5">每次 5 秒</option>
+              <option value="10">每次 10 秒</option>
+              <option value="30" selected>每次 30 秒</option>
+              <option value="60">每次 60 秒</option>
+            </select>
+          </div>
+          <div class="notify-strip">
+            <span>手機即時通知：事件觸發時提醒</span>
+            <button class="secondary" id="notifyBtn">啟用</button>
+          </div>
+        </div>
+        <div class="section-title">參考價 <span id="eventRef">--</span> 監控中</div>
+        <div class="event-list" id="eventList">
+          <div class="empty">請先到資料頁上傳 `2026` 資料夾。</div>
+        </div>
+        <button class="playback-mini" id="showPlayback">回測控制</button>
+      </section>
+
+      <section class="page" id="page-backtest">
+        <div class="panel">
+          <h2>回測控制</h2>
+          <p class="tiny-note">回測會在監控頁直接播放。先到資料頁選擇交易日，再回到監控頁用播放、暫停、前進、快進與秒數控制行情。</p>
+          <div class="field">
+            <label for="jumpDay">快速切換交易日</label>
+            <select id="jumpDay"></select>
+          </div>
+          <div class="field">
+            <label for="jumpSession">盤別</label>
+            <select id="jumpSession">
+              <option value="day">早盤</option>
+              <option value="night">晚盤</option>
+            </select>
+          </div>
+          <button class="primary" id="startPlaybackFromBacktest">進入監控播放</button>
+          <div class="data-summary">
+            <div class="stat"><b id="btDays">0</b><span>已解析</span></div>
+            <div class="stat"><b id="btEvents">0</b><span>目前事件</span></div>
+            <div class="stat"><b id="btMaxMove">0</b><span>最大點差</span></div>
+          </div>
+        </div>
+        <div class="event-list" id="backtestList">
+          <div class="empty">回測事件會在監控頁隨播放進度出現。</div>
+        </div>
+      </section>
+
+      <section class="page" id="page-data">
+        <div class="panel">
+          <h2>資料夾上傳</h2>
+          <div class="field">
+            <label for="folderInput">選擇含每日 zip 的資料夾</label>
+            <input id="folderInput" type="file" webkitdirectory directory multiple accept=".zip">
+          </div>
+          <button class="primary" id="loadData">建立日期清單</button>
+          <div class="progress"><span id="progressBar"></span></div>
+          <div class="row">
+            <div>
+              <div class="row-title" id="loadStatus">尚未建立日期清單</div>
+              <div class="row-sub" id="loadDetail">選資料夾後不會馬上解析，點選某日才讀取 TX。</div>
+            </div>
+          </div>
+          <div class="data-summary">
+            <div class="stat"><b id="zipCount">0</b><span>zip</span></div>
+            <div class="stat"><b id="dayCount">0</b><span>日期</span></div>
+            <div class="stat"><b id="tickCount">0</b><span>已讀筆</span></div>
+          </div>
+        </div>
+        <div class="day-list" id="dayList"></div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="panel">
+          <h2>監控通知</h2>
+          <div class="row">
+            <div>
+              <div class="row-title">早盤</div>
+              <div class="row-sub">08:45-13:45</div>
+            </div>
+            <button class="switch on" data-toggle="dayEnabled"><span></span></button>
+          </div>
+          <div class="row">
+            <div>
+              <div class="row-title">晚盤</div>
+              <div class="row-sub">15:00-05:00</div>
+            </div>
+            <button class="switch on" data-toggle="nightEnabled"><span></span></button>
+          </div>
+          <div class="row">
+            <div>
+              <div class="row-title">10-100 點</div>
+              <div class="row-sub">漲跌每 10 點觸發</div>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="row-title">120-200 點</div>
+              <div class="row-sub">漲跌每 20 點觸發</div>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="row-title">超過 200 點</div>
+              <div class="row-sub">漲跌每 50 點觸發</div>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="row-title">通知音效</div>
+              <div class="row-sub">上漲播放上行音，下降播放下行音</div>
+            </div>
+            <button class="switch on" data-toggle="soundEnabled"><span></span></button>
+          </div>
+          <div class="row">
+            <div>
+              <div class="row-title">百點語音提醒</div>
+              <div class="row-sub">超過 100 點時播報盯盤管家提醒</div>
+            </div>
+            <button class="switch on" data-toggle="voiceEnabled"><span></span></button>
+          </div>
+          <div class="data-summary">
+            <button class="secondary" id="testUpSound">上漲音</button>
+            <button class="secondary" id="testDownSound">下降音</button>
+            <button class="secondary" id="testMajorSound">百點提醒</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>進階監控</h2>
+          <div class="checks" id="advancedChecks">
+            <div class="check-row head"><span></span><span>早盤</span><span>晚盤</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabs">
+      <button class="tab active" data-page="monitor">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.9 4.9 2.8 2.8"/><path d="m16.3 16.3 2.8 2.8"/><path d="m19.1 4.9-2.8 2.8"/><path d="m7.7 16.3-2.8 2.8"/></svg>
+        <span>監控</span>
+      </button>
+      <button class="tab" data-page="backtest">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>
+        <span>回測</span>
+      </button>
+      <button class="tab" data-page="data">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+        <span>資料</span>
+      </button>
+      <button class="tab" data-page="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.36a1.7 1.7 0 0 0-1 .58V20a2 2 0 1 1-4 0v-.08a1.7 1.7 0 0 0-1-.58 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.64 15a1.7 1.7 0 0 0-.58-1H4a2 2 0 1 1 0-4h.08a1.7 1.7 0 0 0 .58-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.64a1.7 1.7 0 0 0 1-.58V4a2 2 0 1 1 4 0v.08a1.7 1.7 0 0 0 1 .58 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.36 9c.22.36.42.72.58 1H20a2 2 0 1 1 0 4h-.08a1.7 1.7 0 0 0-.52 1Z"/></svg>
+        <span>設定</span>
+      </button>
+    </nav>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    const state = {
+      days: [],
+      dayFiles: [],
+      selectedDay: null,
+      session: "day",
+      page: "monitor",
+      loading: false,
+      playback: {
+        active: false,
+        playing: false,
+        collapsed: false,
+        index: 0,
+        seconds: 30,
+        timer: null,
+        notified: new Set()
+      },
+      settings: {
+        dayEnabled: true,
+        nightEnabled: true,
+        instantNotify: false,
+        soundEnabled: true,
+        voiceEnabled: true,
+        advanced: {
+          touchForeignCost: { day: false, night: false },
+          breakTodayHigh: { day: true, night: true },
+          breakTodayLow: { day: true, night: true },
+          breakPrevHigh: { day: true, night: true },
+          breakPrevLow: { day: true, night: true },
+          touchOpen: { day: true, night: true }
+        }
+      }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = new Intl.NumberFormat("zh-TW");
+    const advancedLabels = [
+      ["touchForeignCost", "觸及外資成本價"],
+      ["breakTodayHigh", "突破今日最高點"],
+      ["breakTodayLow", "跌破今日最低點"],
+      ["breakPrevHigh", "突破前盤最高點"],
+      ["breakPrevLow", "跌破前盤最低點"],
+      ["touchOpen", "觸及開盤價"]
+    ];
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function setPage(page) {
+      state.page = page;
+      document.querySelectorAll(".page").forEach((el) => el.classList.toggle("active", el.id === `page-${page}`));
+      document.querySelectorAll(".tab").forEach((el) => el.classList.toggle("active", el.dataset.page === page));
+      render();
+    }
+
+    function setSession(session) {
+      state.session = session;
+      resetPlayback();
+      document.querySelectorAll("#sessionSwitch button").forEach((el) => el.classList.toggle("active", el.dataset.session === session));
+      renderMonitor();
+    }
+
+    function parseFileDate(name) {
+      const m = name.match(/(\d{4})[_-](\d{2})[_-](\d{2})/);
+      return m ? `${m[1]}${m[2]}${m[3]}` : name;
+    }
+
+    function formatDate(date) {
+      if (!/^\d{8}$/.test(date)) return date;
+      return `${date.slice(0, 4)}/${date.slice(4, 6)}/${date.slice(6, 8)}`;
+    }
+
+    function formatTime(time) {
+      const t = String(time).padStart(6, "0");
+      return `${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4, 6)}`;
+    }
+
+    function toSec(time) {
+      const t = String(time).padStart(6, "0");
+      return Number(t.slice(0, 2)) * 3600 + Number(t.slice(2, 4)) * 60 + Number(t.slice(4, 6));
+    }
+
+    function sessionOf(time) {
+      const sec = toSec(time);
+      if (sec >= 8 * 3600 + 45 * 60 && sec <= 13 * 3600 + 45 * 60) return "day";
+      if (sec >= 15 * 3600 || sec <= 5 * 3600) return "night";
+      return null;
+    }
+
+    function pct(delta, ref) {
+      if (!ref) return "0.00%";
+      return `${((delta / ref) * 100).toFixed(2)}%`;
+    }
+
+    function thresholds(maxAbs) {
+      const out = [];
+      for (let n = 10; n <= 100; n += 10) out.push(n);
+      for (let n = 120; n <= 200; n += 20) out.push(n);
+      for (let n = 250; n <= Math.max(250, Math.ceil(maxAbs / 50) * 50); n += 50) out.push(n);
+      return out;
+    }
+
+    function getSession(day, session) {
+      return day?.sessions?.[session] || null;
+    }
+
+    function tickAbsSec(tick) {
+      const d = String(tick.date);
+      if (!/^\d{8}$/.test(d)) return toSec(tick.time);
+      const year = Number(d.slice(0, 4));
+      const month = Number(d.slice(4, 6)) - 1;
+      const day = Number(d.slice(6, 8));
+      return Math.floor(Date.UTC(year, month, day) / 1000) + toSec(tick.time);
+    }
+
+    function resetPlayback() {
+      stopPlaybackTimer();
+      state.playback.active = false;
+      state.playback.playing = false;
+      state.playback.collapsed = false;
+      state.playback.index = 0;
+      state.playback.notified = new Set();
+    }
+
+    function startPlayback() {
+      const session = getSession(state.selectedDay, state.session);
+      if (!session?.ticks?.length) {
+        showToast("這個盤別沒有可播放資料。");
+        return;
+      }
+      unlockAudio();
+      state.playback.active = true;
+      state.playback.playing = true;
+      state.playback.index = Math.min(state.playback.index, session.ticks.length - 1);
+      state.playback.notified = state.playback.notified || new Set();
+      stopPlaybackTimer();
+      state.playback.timer = setInterval(stepPlayback, 360);
+      renderMonitor();
+    }
+
+    function pausePlayback() {
+      state.playback.playing = false;
+      stopPlaybackTimer();
+      renderMonitor();
+    }
+
+    function stopPlaybackTimer() {
+      if (state.playback.timer) {
+        clearInterval(state.playback.timer);
+        state.playback.timer = null;
+      }
+    }
+
+    function stepPlayback(multiplier = 1) {
+      const session = getSession(state.selectedDay, state.session);
+      if (!session?.ticks?.length) return;
+      state.playback.active = true;
+      const current = session.ticks[state.playback.index] || session.ticks[0];
+      const target = tickAbsSec(current) + state.playback.seconds * multiplier;
+      let next = state.playback.index + 1;
+      while (next < session.ticks.length - 1 && tickAbsSec(session.ticks[next]) < target) next++;
+      state.playback.index = Math.min(next, session.ticks.length - 1);
+      if (state.playback.index >= session.ticks.length - 1) pausePlayback();
+      renderMonitor();
+    }
+
+    function seekPlayback(index) {
+      const session = getSession(state.selectedDay, state.session);
+      if (!session?.ticks?.length) return;
+      state.playback.active = true;
+      state.playback.index = Math.max(0, Math.min(Number(index) || 0, session.ticks.length - 1));
+      state.playback.notified = new Set();
+      renderMonitor();
+    }
+
+    function visibleSession(session) {
+      if (!state.playback.active || !session?.ticks?.length) return session;
+      const ticks = session.ticks.slice(0, Math.max(1, state.playback.index + 1));
+      const partial = computeSession(ticks);
+      partial.fullLength = session.ticks.length;
+      return partial;
+    }
+
+    function eventKey(event) {
+      return `${event.date}-${event.time}-${event.type}-${event.points}-${event.price}`;
+    }
+
+    function getAudioContext() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return null;
+      const audio = playTone.ctx || new AudioContext();
+      playTone.ctx = audio;
+      return audio;
+    }
+
+    function unlockAudio() {
+      const audio = getAudioContext();
+      if (!audio) return;
+      if (audio.state === "suspended") audio.resume();
+    }
+
+    function playTone(kind) {
+      if (!state.settings.soundEnabled) return;
+      const audio = getAudioContext();
+      if (!audio) return;
+      if (audio.state === "suspended") audio.resume();
+
+      const now = audio.currentTime;
+      const notes = kind === "up"
+        ? [880, 1175]
+        : [660, 440];
+      notes.forEach((freq, index) => {
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + index * 0.11);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.11);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.11 + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.11 + 0.1);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now + index * 0.11);
+        osc.stop(now + index * 0.11 + 0.12);
+      });
+    }
+
+    function playMajorTone(kind) {
+      if (!state.settings.soundEnabled) return;
+      const audio = getAudioContext();
+      if (!audio) return;
+      if (audio.state === "suspended") audio.resume();
+      const now = audio.currentTime;
+      const notes = kind === "up"
+        ? [784, 988, 1319]
+        : [784, 587, 392];
+      notes.forEach((freq, index) => {
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, now + index * 0.12);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + index * 0.12 + 0.014);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.12 + 0.115);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now + index * 0.12);
+        osc.stop(now + index * 0.12 + 0.13);
+      });
+    }
+
+    async function playFixedGoogleVoice(kind) {
+      const src = kind === "up"
+        ? "assets/google-tts-major-up.mp3"
+        : "assets/google-tts-major-down.mp3";
+      try {
+        const audio = new Audio(src);
+        audio.volume = 1;
+        await audio.play();
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function speakMajorMove(kind) {
+      if (!state.settings.voiceEnabled) return;
+      const playedFixedVoice = await playFixedGoogleVoice(kind);
+      if (playedFixedVoice) return;
+      if (!("speechSynthesis" in window)) return;
+      const text = `盯盤管家提醒，目前${kind === "up" ? "上漲" : "下跌"}超過100點`;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "zh-TW";
+      const voices = window.speechSynthesis.getVoices();
+      const zhVoices = voices.filter((voice) => /^zh[-_]/i.test(voice.lang));
+      const femaleVoice = zhVoices.find((voice) => /female|woman|girl|mei|mei-jia|hanhan|yaoyao|xiaoxiao|hsiao|ting|yating|google 國語|google 普通話/i.test(`${voice.name} ${voice.lang}`));
+      utterance.voice = femaleVoice || zhVoices.find((voice) => voice.lang === "zh-TW") || zhVoices[0] || null;
+      utterance.rate = 0.92;
+      utterance.pitch = 1.35;
+      utterance.volume = 1;
+      setTimeout(() => window.speechSynthesis.speak(utterance), 420);
+    }
+
+    function maybeNotify(events) {
+      if (!state.playback.playing) return;
+      for (const event of events) {
+        const key = eventKey(event);
+        if (state.playback.notified.has(key)) continue;
+        state.playback.notified.add(key);
+        const kind = event.delta >= 0 ? "up" : "down";
+        if (Math.abs(event.delta) >= 100) {
+          playMajorTone(kind);
+          speakMajorMove(kind);
+        } else {
+          playTone(kind);
+        }
+        if (state.settings.instantNotify && "Notification" in window && Notification.permission === "granted") {
+          new Notification("期貨盯盤管家", {
+            body: `${event.type}${event.points ? ` ${event.points}點` : ""} 到 ${event.price}｜${formatTime(event.time)}`
+          });
+        }
+      }
+    }
+
+    function computeSession(ticks) {
+      if (!ticks.length) return null;
+      const ref = ticks[0].price;
+      let high = -Infinity;
+      let low = Infinity;
+      let volume = 0;
+      let maxAbs = 0;
+      for (const tick of ticks) {
+        if (tick.price > high) high = tick.price;
+        if (tick.price < low) low = tick.price;
+        volume += tick.qty;
+        maxAbs = Math.max(maxAbs, Math.abs(tick.price - ref));
+      }
+      return {
+        ticks,
+        ref,
+        open: ref,
+        high,
+        low,
+        close: ticks[ticks.length - 1].price,
+        volume,
+        first: ticks[0],
+        last: ticks[ticks.length - 1],
+        events: computeEvents(ticks, ref, maxAbs)
+      };
+    }
+
+    function computeEvents(ticks, ref, maxAbs) {
+      const events = [];
+      const list = thresholds(maxAbs);
+      const hitUp = new Set();
+      const hitDown = new Set();
+      let runningHigh = ref;
+      let runningLow = ref;
+      let movedAwayFromOpen = false;
+      let touchedOpen = false;
+
+      for (const tick of ticks) {
+        const delta = tick.price - ref;
+        const abs = Math.abs(delta);
+
+        for (const n of list) {
+          if (delta >= n && !hitUp.has(n)) {
+            hitUp.add(n);
+            events.push(makeEvent("上升", n, tick, delta));
+          }
+          if (delta <= -n && !hitDown.has(n)) {
+            hitDown.add(n);
+            events.push(makeEvent("下跌", n, tick, delta));
+          }
+        }
+
+        if (tick.price !== ref) movedAwayFromOpen = true;
+        if (movedAwayFromOpen && !touchedOpen && tick.price === ref) {
+          touchedOpen = true;
+          events.push(makeEvent("觸及開盤價", 0, tick, delta));
+        }
+
+        if (tick.price > runningHigh) {
+          runningHigh = tick.price;
+        }
+        if (tick.price < runningLow) {
+          runningLow = tick.price;
+        }
+      }
+
+      events.sort((a, b) => a.order - b.order);
+      return events;
+    }
+
+    function makeEvent(type, points, tick, delta) {
+      return {
+        type,
+        points,
+        price: tick.price,
+        date: tick.date,
+        time: tick.time,
+        delta,
+        order: Number(`${tick.date}${String(tick.time).padStart(6, "0")}`)
+      };
+    }
+
+    function filterEvents(sessionName, events) {
+      const enabled = sessionName === "day" ? state.settings.dayEnabled : state.settings.nightEnabled;
+      if (!enabled) return [];
+      const adv = state.settings.advanced;
+      return events.filter((event) => {
+        if (event.type === "觸及開盤價") return adv.touchOpen[sessionName];
+        return true;
+      });
+    }
+
+    function render() {
+      renderSettings();
+      renderData();
+      renderMonitor();
+      renderBacktestControls();
+    }
+
+    function renderMonitor() {
+      const day = state.selectedDay || state.days[0];
+      const fullSession = getSession(day, state.session);
+      const session = visibleSession(fullSession);
+      $("quoteTitle").textContent = `台股期貨${state.session === "day" ? "早盤" : "晚盤"}`;
+
+      if (!day || !session) {
+        $("lastPrice").textContent = "--";
+        $("quoteChange").textContent = "--";
+        $("quoteChange").className = "quote-change flat";
+        $("sessionVolume").textContent = "--";
+        $("openPrice").textContent = "--";
+        $("highPrice").textContent = "--";
+        $("lowPrice").textContent = "--";
+        $("refPrice").textContent = "--";
+        $("contractName").textContent = "--";
+        $("eventRef").textContent = "--";
+        $("eventList").innerHTML = `<div class="empty">請先到資料頁上傳資料，或切換到有資料的盤別。</div>`;
+        drawEmptyChart();
+        renderPlaybackControls(null);
+        return;
+      }
+
+      const delta = session.close - session.ref;
+      const cls = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+      $("lastPrice").textContent = fmt.format(session.close);
+      $("quoteChange").innerHTML = `${delta > 0 ? "▲" : delta < 0 ? "▼" : ""} ${Math.abs(delta)} <small>(${pct(delta, session.ref)})</small>`;
+      $("quoteChange").className = `quote-change ${cls}`;
+      $("sessionVolume").textContent = fmt.format(session.volume);
+      $("openPrice").textContent = fmt.format(session.open);
+      $("highPrice").textContent = fmt.format(session.high);
+      $("lowPrice").textContent = fmt.format(session.low);
+      $("refPrice").textContent = fmt.format(session.ref);
+      $("contractName").textContent = day.contract;
+      $("eventRef").textContent = fmt.format(session.ref);
+      drawChart(session);
+      const events = filterEvents(state.session, session.events);
+      maybeNotify(events);
+      renderEvents($("eventList"), events, day, state.session, true);
+      renderPlaybackControls(fullSession);
+    }
+
+    function renderPlaybackControls(session) {
+      const panel = document.querySelector(".playback-panel");
+      const mini = $("showPlayback");
+      const hasData = !!session?.ticks?.length;
+      panel.classList.toggle("hidden", !state.playback.active || state.playback.collapsed);
+      mini.classList.toggle("show", state.playback.active && state.playback.collapsed);
+      $("playPauseBtn").textContent = state.playback.playing ? "Ⅱ" : "▶";
+      $("speedSelect").value = String(state.playback.seconds);
+      $("notifyBtn").textContent = state.settings.instantNotify ? "已啟用" : "啟用";
+
+      if (!hasData) {
+        $("playbackTitle").textContent = "回測播放";
+        $("playbackTime").textContent = "尚未選擇交易日";
+        $("playbackRange").max = "0";
+        $("playbackRange").value = "0";
+        return;
+      }
+
+      const idx = state.playback.active ? Math.min(state.playback.index, session.ticks.length - 1) : session.ticks.length - 1;
+      const tick = session.ticks[idx];
+      $("playbackTitle").textContent = state.playback.active ? "回測播放中" : "即時檢視";
+      $("playbackTime").textContent = `${formatDate(tick.date)} ${formatTime(tick.time)}｜${idx + 1}/${session.ticks.length}`;
+      $("playbackRange").max = String(session.ticks.length - 1);
+      $("playbackRange").value = String(idx);
+    }
+
+    function drawEmptyChart() {
+      $("chart").innerHTML = `
+        <rect x="0" y="0" width="390" height="250" fill="#fff"></rect>
+        <text x="195" y="125" text-anchor="middle" fill="#8a96a3" font-size="15">尚無行情資料</text>
+      `;
+    }
+
+    function minuteSeries(ticks) {
+      const buckets = [];
+      let current = null;
+      for (const tick of ticks) {
+        const t = String(tick.time).padStart(6, "0");
+        const key = `${tick.date}-${t.slice(0, 4)}`;
+        if (!current || current.key !== key) {
+          current = {
+            key,
+            date: tick.date,
+            time: `${t.slice(0, 4)}00`,
+            open: tick.price,
+            high: tick.price,
+            low: tick.price,
+            close: tick.price,
+            qty: tick.qty
+          };
+          buckets.push(current);
+        } else {
+          current.high = Math.max(current.high, tick.price);
+          current.low = Math.min(current.low, tick.price);
+          current.close = tick.price;
+          current.qty += tick.qty;
+        }
+      }
+      return buckets;
+    }
+
+    function drawChart(session) {
+      const svg = $("chart");
+      const ticks = minuteSeries(session.ticks);
+      const width = 390;
+      const height = 250;
+      const pad = { top: 14, right: 34, bottom: 42, left: 8 };
+      const chartH = 152;
+      const volTop = 178;
+      if (!ticks.length) {
+        drawEmptyChart();
+        return;
+      }
+      const max = Math.max(...ticks.map((tick) => tick.high), session.ref);
+      const min = Math.min(...ticks.map((tick) => tick.low), session.ref);
+      const span = Math.max(1, max - min);
+      const pts = [];
+      const vols = [];
+      let maxQty = 1;
+
+      for (let i = 0; i < ticks.length; i++) {
+        const tick = ticks[i];
+        const x = pad.left + (i / Math.max(1, ticks.length - 1)) * (width - pad.left - pad.right);
+        const y = pad.top + ((max - tick.close) / span) * chartH;
+        pts.push([x, y, tick.close]);
+        vols.push([x, tick.qty]);
+        if (tick.qty > maxQty) maxQty = tick.qty;
+      }
+
+      const refY = pad.top + ((max - session.ref) / span) * chartH;
+      const pointText = pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+      const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+      const areaPath = `${linePath} L ${pts[pts.length - 1][0].toFixed(1)} ${refY.toFixed(1)} L ${pts[0][0].toFixed(1)} ${refY.toFixed(1)} Z`;
+      const grid = [0, 1, 2, 3].map((n) => {
+        const y = pad.top + n * (chartH / 3);
+        return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="#edf1f5" stroke-width="1"/>`;
+      }).join("");
+      const bars = vols.map(([x, qty]) => {
+        const h = Math.max(1, (qty / maxQty) * 52);
+        return `<rect x="${x.toFixed(1)}" y="${(volTop + 52 - h).toFixed(1)}" width="1.2" height="${h.toFixed(1)}" fill="#9ca6b1"/>`;
+      }).join("");
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="areaUp" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e25555" stop-opacity="0.42"/>
+            <stop offset="100%" stop-color="#e25555" stop-opacity="0.08"/>
+          </linearGradient>
+          <linearGradient id="areaDown" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#19aa70" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#19aa70" stop-opacity="0.42"/>
+          </linearGradient>
+          <clipPath id="clipAboveRef"><rect x="0" y="0" width="${width}" height="${Math.max(0, refY).toFixed(1)}"/></clipPath>
+          <clipPath id="clipBelowRef"><rect x="0" y="${refY.toFixed(1)}" width="${width}" height="${Math.max(0, height - refY).toFixed(1)}"/></clipPath>
+        </defs>
+        <rect x="0" y="0" width="${width}" height="${height}" fill="#fff"></rect>
+        ${grid}
+        <path d="${areaPath}" fill="url(#areaUp)" clip-path="url(#clipAboveRef)"/>
+        <path d="${areaPath}" fill="url(#areaDown)" clip-path="url(#clipBelowRef)"/>
+        <line x1="0" y1="${refY.toFixed(1)}" x2="${width}" y2="${refY.toFixed(1)}" stroke="#b7c3cf" stroke-width="1.2"/>
+        <path d="${linePath}" fill="none" stroke="var(--red)" stroke-width="2.1" clip-path="url(#clipAboveRef)"/>
+        <path d="${linePath}" fill="none" stroke="var(--green)" stroke-width="2.1" clip-path="url(#clipBelowRef)"/>
+        ${bars}
+        <text x="${width - 4}" y="${Math.max(18, pad.top + 4)}" text-anchor="end" fill="var(--red)" font-size="14">${fmt.format(max)}</text>
+        <text x="${width - 4}" y="${refY - 4}" text-anchor="end" fill="#4d5965" font-size="14">${fmt.format(session.ref)}</text>
+        <text x="${width - 4}" y="${pad.top + chartH + 18}" text-anchor="end" fill="var(--green)" font-size="14">${fmt.format(min)}</text>
+        <text x="8" y="242" fill="#7c8792" font-size="13">${formatTime(ticks[0].time).slice(0, 5)}</text>
+        <text x="${width - 8}" y="242" text-anchor="end" fill="#7c8792" font-size="13">${formatTime(ticks[ticks.length - 1].time).slice(0, 5)}</text>
+      `;
+    }
+
+    function renderEvents(container, events, day, sessionName, newestFirst) {
+      if (!events.length) {
+        container.innerHTML = `<div class="empty">目前沒有觸發事件。</div>`;
+        return;
+      }
+      const list = newestFirst ? [...events].reverse() : events;
+      container.innerHTML = list.slice(0, 300).map((event) => {
+        const cls = event.delta > 0 ? "up" : event.delta < 0 ? "down" : "flat";
+        const points = event.points ? `${event.points} 點` : "";
+        return `
+          <div class="event-row">
+            <div>
+              <div class="event-main ${cls}">${event.delta >= 0 ? "▲" : "▼"} ${event.type} ${points} 到 ${fmt.format(event.price)}</div>
+              <div class="event-sub">${formatDate(day.date)} ${sessionName === "day" ? "早盤" : "晚盤"}｜${day.contract}</div>
+            </div>
+            <div class="event-time">${formatTime(event.time)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderData() {
+      $("zipCount").textContent = String($("folderInput").files?.length || 0);
+      $("dayCount").textContent = String(state.dayFiles.length);
+      $("tickCount").textContent = fmt.format(state.days.reduce((sum, day) => sum + day.tickCount, 0));
+      if (!state.dayFiles.length) {
+        $("dayList").innerHTML = "";
+        return;
+      }
+      $("dayList").innerHTML = state.dayFiles.map((item, index) => {
+        const day = item.day;
+        const status = item.loading ? "解析中" : day ? `${day.contract}｜量 ${fmt.format(day.volume)}` : item.error ? "解析失敗" : "尚未解析";
+        const sub = day
+          ? `早 ${day.sessions.day ? fmt.format(day.sessions.day.volume) : "無"}｜晚 ${day.sessions.night ? fmt.format(day.sessions.night.volume) : "無"}｜${fmt.format(day.tickCount)} 筆`
+          : item.file.name;
+        return `
+        <div class="day-row">
+          <div>
+            <div class="row-title">${formatDate(item.date)}｜${status}</div>
+            <div class="row-sub">${sub}</div>
+          </div>
+          <button data-select-day="${index}">${day ? "查看" : "讀取"}</button>
+        </div>
+      `;
+      }).join("");
+    }
+
+    function renderBacktestControls() {
+      const loadedItems = state.dayFiles
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => !!item.day);
+      const options = loadedItems.map(({ item, index }) => `<option value="${index}">${formatDate(item.date)}｜${item.day.contract}</option>`).join("");
+      if ($("jumpDay").dataset.count !== String(loadedItems.length)) {
+        $("jumpDay").innerHTML = options;
+        $("jumpDay").dataset.count = String(loadedItems.length);
+      }
+      $("jumpSession").value = state.session;
+      const current = state.selectedDay ? getSession(state.selectedDay, state.session) : null;
+      const events = current ? filterEvents(state.session, current.events) : [];
+      $("btDays").textContent = String(state.days.length);
+      $("btEvents").textContent = fmt.format(events.length);
+      $("btMaxMove").textContent = fmt.format(events.reduce((max, event) => Math.max(max, Math.abs(event.delta)), 0));
+      if (!events.length) {
+        $("backtestList").innerHTML = `<div class="empty">選擇並讀取某一日後，事件會在監控頁播放。</div>`;
+        return;
+      }
+      renderEvents($("backtestList"), events, state.selectedDay, state.session, true);
+    }
+
+    function renderSettings() {
+      document.querySelectorAll(".switch").forEach((btn) => {
+        btn.classList.toggle("on", !!state.settings[btn.dataset.toggle]);
+      });
+
+      const boxHtml = advancedLabels.map(([key, label]) => `
+        <div class="check-row">
+          <span>${label}</span>
+          <button class="box ${state.settings.advanced[key].day ? "on" : ""}" data-advanced="${key}" data-session-box="day">${state.settings.advanced[key].day ? "✓" : ""}</button>
+          <button class="box ${state.settings.advanced[key].night ? "on" : ""}" data-advanced="${key}" data-session-box="night">${state.settings.advanced[key].night ? "✓" : ""}</button>
+        </div>
+      `).join("");
+      $("advancedChecks").innerHTML = `<div class="check-row head"><span></span><span>早盤</span><span>晚盤</span></div>${boxHtml}`;
+    }
+
+    async function loadSelectedFiles() {
+      if (state.loading) return;
+      const files = [...$("folderInput").files].filter((file) => file.name.toLowerCase().endsWith(".zip"));
+      if (!files.length) {
+        showToast("請先選擇含 zip 的資料夾。");
+        return;
+      }
+
+      resetPlayback();
+      state.days = [];
+      state.dayFiles = files
+        .sort((a, b) => parseFileDate(a.name).localeCompare(parseFileDate(b.name)))
+        .map((file) => ({ date: parseFileDate(file.name), file, day: null, loading: false, error: "" }));
+      state.selectedDay = null;
+      $("progressBar").style.width = "100%";
+      $("loadStatus").textContent = `已建立 ${state.dayFiles.length} 個交易日`;
+      $("loadDetail").textContent = "尚未解析成交資料，請點選某一天開始回測。";
+      render();
+    }
+
+    async function selectDay(index) {
+      const item = state.dayFiles[index];
+      if (!item || item.loading) return;
+      if (item.day) {
+        resetPlayback();
+        state.selectedDay = item.day;
+        state.playback.active = false;
+        state.playback.index = 0;
+        render();
+        setPage("monitor");
+        return;
+      }
+      resetPlayback();
+      item.loading = true;
+      item.error = "";
+      $("loadStatus").textContent = `正在讀取 ${formatDate(item.date)}`;
+      $("loadDetail").textContent = "只解析這一天，並挑選 TX 成交量最大單一月份契約。";
+      renderData();
+      try {
+        const day = await parseDailyZip(item.file);
+        if (!day) throw new Error("沒有可用 TX 資料");
+        item.day = day;
+        if (!state.days.includes(day)) state.days.push(day);
+        state.selectedDay = day;
+        state.playback.index = 0;
+        state.playback.active = false;
+        $("loadStatus").textContent = `已讀取 ${formatDate(item.date)}｜${day.contract}`;
+        $("loadDetail").textContent = "已可查看當日行情；需要回測時請到回測頁進入播放。";
+        render();
+        setPage("monitor");
+      } catch (error) {
+        item.error = error.message || "解析失敗";
+        $("loadStatus").textContent = `${formatDate(item.date)} 解析失敗`;
+        $("loadDetail").textContent = item.error;
+        showToast(item.error);
+        render();
+      } finally {
+        item.loading = false;
+        renderData();
+      }
+    }
+
+    async function parseDailyZip(file) {
+      const buffer = await file.arrayBuffer();
+      const entry = getFirstRptEntry(buffer);
+      if (!entry) throw new Error("zip 中沒有 rpt");
+      const raw = await inflateEntry(buffer, entry);
+      const text = decodeRpt(raw);
+      const lines = text.split(/\r?\n/);
+      const volumes = new Map();
+
+      for (let i = 1; i < lines.length; i++) {
+        const p = lines[i].split(",");
+        if (p.length < 6) continue;
+        const code = p[1].trim();
+        const contract = p[2].trim();
+        if (code !== "TX" || !contract || contract.includes("/")) continue;
+        const qty = Number.parseInt(p[5], 10) || 0;
+        volumes.set(contract, (volumes.get(contract) || 0) + qty);
+      }
+
+      let selectedContract = "";
+      let selectedVolume = -1;
+      for (const [contract, volume] of volumes) {
+        if (volume > selectedVolume) {
+          selectedContract = contract;
+          selectedVolume = volume;
+        }
+      }
+      if (!selectedContract) return null;
+
+      const ticks = [];
+      for (let i = 1; i < lines.length; i++) {
+        const p = lines[i].split(",");
+        if (p.length < 6) continue;
+        if (p[1].trim() !== "TX" || p[2].trim() !== selectedContract) continue;
+        const sessionName = sessionOf(p[3].trim());
+        if (!sessionName) continue;
+        ticks.push({
+          date: p[0].trim(),
+          time: p[3].trim().padStart(6, "0"),
+          price: Number(p[4]),
+          qty: Number.parseInt(p[5], 10) || 0,
+          session: sessionName
+        });
+      }
+
+      ticks.sort((a, b) => {
+        const ad = Number(a.date);
+        const bd = Number(b.date);
+        if (ad !== bd) return ad - bd;
+        return Number(a.time) - Number(b.time);
+      });
+
+      const dayTicks = ticks.filter((tick) => tick.session === "day");
+      const nightTicks = ticks.filter((tick) => tick.session === "night");
+      const date = parseFileDate(file.name);
+      return {
+        date,
+        fileName: file.name,
+        contract: selectedContract,
+        volume: selectedVolume,
+        tickCount: ticks.length,
+        sessions: {
+          day: computeSession(dayTicks),
+          night: computeSession(nightTicks)
+        }
+      };
+    }
+
+    function decodeRpt(buffer) {
+      const decoders = ["big5", "utf-8"];
+      for (const enc of decoders) {
+        try {
+          return new TextDecoder(enc).decode(buffer);
+        } catch (_) {}
+      }
+      return new TextDecoder().decode(buffer);
+    }
+
+    function getFirstRptEntry(buffer) {
+      const view = new DataView(buffer);
+      const bytes = new Uint8Array(buffer);
+      let eocd = -1;
+      for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 66000); i--) {
+        if (view.getUint32(i, true) === 0x06054b50) {
+          eocd = i;
+          break;
+        }
+      }
+      if (eocd < 0) return null;
+      const total = view.getUint16(eocd + 10, true);
+      let offset = view.getUint32(eocd + 16, true);
+      const names = new TextDecoder("utf-8");
+
+      for (let i = 0; i < total; i++) {
+        if (view.getUint32(offset, true) !== 0x02014b50) return null;
+        const method = view.getUint16(offset + 10, true);
+        const compressedSize = view.getUint32(offset + 20, true);
+        const uncompressedSize = view.getUint32(offset + 24, true);
+        const nameLen = view.getUint16(offset + 28, true);
+        const extraLen = view.getUint16(offset + 30, true);
+        const commentLen = view.getUint16(offset + 32, true);
+        const localOffset = view.getUint32(offset + 42, true);
+        const name = names.decode(bytes.slice(offset + 46, offset + 46 + nameLen));
+        if (name.toLowerCase().endsWith(".rpt")) {
+          return { name, method, compressedSize, uncompressedSize, localOffset };
+        }
+        offset += 46 + nameLen + extraLen + commentLen;
+      }
+      return null;
+    }
+
+    async function inflateEntry(buffer, entry) {
+      const view = new DataView(buffer);
+      if (view.getUint32(entry.localOffset, true) !== 0x04034b50) {
+        throw new Error("local header 不正確");
+      }
+      const nameLen = view.getUint16(entry.localOffset + 26, true);
+      const extraLen = view.getUint16(entry.localOffset + 28, true);
+      const start = entry.localOffset + 30 + nameLen + extraLen;
+      const data = buffer.slice(start, start + entry.compressedSize);
+
+      if (entry.method === 0) return data;
+      if (entry.method !== 8) throw new Error(`不支援的 zip 壓縮方法 ${entry.method}`);
+      if (!("DecompressionStream" in window)) {
+        throw new Error("此瀏覽器不支援前端解壓縮，請使用新版 Chrome 或 Edge。");
+      }
+
+      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return await new Response(stream).arrayBuffer();
+    }
+
+    async function startPlaybackFromBacktest() {
+      const index = Number($("jumpDay").value);
+      const session = $("jumpSession").value;
+      if (!state.dayFiles.length) {
+        showToast("請先到資料頁建立日期清單。");
+        return;
+      }
+      state.session = session;
+      document.querySelectorAll("#sessionSwitch button").forEach((el) => el.classList.toggle("active", el.dataset.session === session));
+      await selectDay(index);
+      state.playback.active = true;
+      state.playback.index = 0;
+      renderMonitor();
+    }
+
+    document.querySelector(".tabs").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-page]");
+      if (btn) setPage(btn.dataset.page);
+    });
+
+    $("sessionSwitch").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-session]");
+      if (btn) setSession(btn.dataset.session);
+    });
+
+    $("settingsShortcut").addEventListener("click", () => setPage("settings"));
+    $("dataShortcut").addEventListener("click", () => setPage("data"));
+    $("loadData").addEventListener("click", loadSelectedFiles);
+    $("startPlaybackFromBacktest").addEventListener("click", startPlaybackFromBacktest);
+    $("playPauseBtn").addEventListener("click", () => {
+      if (state.playback.playing) pausePlayback();
+      else startPlayback();
+    });
+    $("stepBtn").addEventListener("click", () => stepPlayback(1));
+    $("fastBtn").addEventListener("click", () => stepPlayback(8));
+    $("speedSelect").addEventListener("change", (event) => {
+      state.playback.seconds = Number(event.target.value) || 30;
+      renderPlaybackControls(getSession(state.selectedDay, state.session));
+    });
+    $("playbackRange").addEventListener("input", (event) => {
+      pausePlayback();
+      seekPlayback(event.target.value);
+    });
+    $("notifyBtn").addEventListener("click", async () => {
+      if (!("Notification" in window)) {
+        showToast("這個瀏覽器不支援即時通知。");
+        return;
+      }
+      if (Notification.permission === "default") {
+        const permission = await Notification.requestPermission();
+        state.settings.instantNotify = permission === "granted";
+      } else {
+        state.settings.instantNotify = Notification.permission === "granted" ? !state.settings.instantNotify : false;
+      }
+      if (Notification.permission === "denied") showToast("通知權限被封鎖，請到瀏覽器設定開啟。");
+      renderMonitor();
+    });
+    $("collapsePlayback").addEventListener("click", () => {
+      state.playback.collapsed = true;
+      renderMonitor();
+    });
+    $("showPlayback").addEventListener("click", () => {
+      state.playback.collapsed = false;
+      renderMonitor();
+    });
+    $("testUpSound").addEventListener("click", () => {
+      unlockAudio();
+      playTone("up");
+    });
+    $("testDownSound").addEventListener("click", () => {
+      unlockAudio();
+      playTone("down");
+    });
+    $("testMajorSound").addEventListener("click", () => {
+      unlockAudio();
+      playMajorTone("up");
+      speakMajorMove("up");
+    });
+
+    $("dayList").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-select-day]");
+      if (!btn) return;
+      selectDay(Number(btn.dataset.selectDay));
+    });
+
+    document.addEventListener("click", (event) => {
+      const sw = event.target.closest("[data-toggle]");
+      if (sw) {
+        state.settings[sw.dataset.toggle] = !state.settings[sw.dataset.toggle];
+        render();
+      }
+      const box = event.target.closest("[data-advanced]");
+      if (box) {
+        const key = box.dataset.advanced;
+        const session = box.dataset.sessionBox;
+        state.settings.advanced[key][session] = !state.settings.advanced[key][session];
+        render();
+      }
+    });
+
+    function bootPwa() {
+      const hashPage = location.hash.replace("#", "");
+      if (["monitor", "backtest", "data", "settings"].includes(hashPage)) {
+        setPage(hashPage);
+      }
+
+      if ("serviceWorker" in navigator && location.protocol !== "file:") {
+        navigator.serviceWorker.register("./sw.js").catch((error) => {
+          console.warn("service worker registration failed", error);
+        });
+      }
+    }
+
+    render();
+    bootPwa();
+  </script>
+</body>
+</html>
