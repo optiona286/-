@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#ffffff"/>
-  <circle cx="256" cy="256" r="176" fill="none" stroke="#b4151c" stroke-width="54"/>
-  <circle cx="256" cy="256" r="86" fill="none" stroke="#b4151c" stroke-width="54"/>
-  <circle cx="256" cy="256" r="18" fill="#b4151c"/>
+  <circle cx="256" cy="256" r="176" fill="none" stroke="#075db7" stroke-width="54"/>
+  <circle cx="256" cy="256" r="86" fill="none" stroke="#137bd2" stroke-width="54"/>
+  <circle cx="256" cy="256" r="18" fill="#075db7"/>
   <path d="M256 58v112" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
   <path d="M256 342v112" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
   <path d="M58 256h112" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
   <path d="M342 256h112" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
-  <path d="M256 207v98" stroke="#b4151c" stroke-width="16" stroke-linecap="round"/>
-  <path d="M207 256h98" stroke="#b4151c" stroke-width="16" stroke-linecap="round"/>
+  <path d="M256 207v98" stroke="#075db7" stroke-width="16" stroke-linecap="round"/>
+  <path d="M207 256h98" stroke="#075db7" stroke-width="16" stroke-linecap="round"/>
 </svg>
