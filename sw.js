@@ -1,4 +1,4 @@
-const CACHE_NAME = "futures-watch-pwa-v1";
+const CACHE_NAME = "futures-watch-pwa-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
