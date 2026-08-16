@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#075db7">
+  <meta name="theme-color" content="#0969b6">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="盯盤管家">
@@ -14,16 +14,16 @@
   <title>期貨盯盤管家</title>
   <style>
     :root {
-      --blue: #137bd2;
-      --blue-dark: #075db7;
-      --blue-soft: #eaf4ff;
-      --bg: #e8eef6;
+      --blue: #137ed2;
+      --blue-dark: #0969b6;
+      --blue-soft: #e9f4ff;
+      --bg: #edf2f7;
       --panel: #ffffff;
-      --line: #d7e0e9;
-      --text: #24364b;
-      --muted: #818b96;
-      --red: #d84f4f;
-      --green: #16a86a;
+      --line: #d9dde1;
+      --text: #3d434a;
+      --muted: #959ba1;
+      --red: #df5a57;
+      --green: #0caf68;
       --gray: #f1f5f9;
       --shadow: 0 10px 24px rgba(22, 54, 86, .08);
     }
@@ -37,7 +37,9 @@
       background: var(--bg);
       color: var(--text);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
-      letter-spacing: 0;
+      letter-spacing: .005em;
+      font-size: 16px;
+      line-height: 1.35;
     }
 
     button, input, select {
@@ -64,9 +66,9 @@
     }
 
     .topbar {
-      background: linear-gradient(90deg, #2d97ec 0%, #0870d1 45%, #075db7 100%);
+      background: linear-gradient(90deg, #3193e6 0%, #147fd5 48%, #0867bb 100%);
       color: #fff;
-      padding: calc(env(safe-area-inset-top) + 6px) 12px 8px;
+      padding: calc(env(safe-area-inset-top) + 3px) 14px 5px;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -74,16 +76,16 @@
     }
 
     .top-row {
-      min-height: 38px;
+      min-height: 36px;
       display: grid;
-      grid-template-columns: 38px 1fr 38px;
+      grid-template-columns: 34px 1fr 34px;
       align-items: center;
       gap: 10px;
     }
 
     .icon-btn {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 8px;
       display: grid;
       place-items: center;
@@ -93,8 +95,8 @@
 
     .icon-btn svg,
     .tab svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       stroke: currentColor;
       fill: none;
       stroke-width: 2.2;
@@ -103,12 +105,12 @@
     }
 
     .segmented {
-      height: 36px;
-      max-width: 174px;
+      height: 34px;
+      max-width: 160px;
       width: 100%;
       margin: 0 auto;
       border: 1px solid rgba(255,255,255,.85);
-      border-radius: 9px;
+      border-radius: 8px;
       overflow: hidden;
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -117,8 +119,8 @@
 
     .segmented button {
       color: #fff;
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 650;
     }
 
     .segmented button.active {
@@ -143,45 +145,46 @@
 
     .quote {
       background: var(--blue-soft);
-      padding: 12px 14px 9px;
+      padding: 6px 14px 5px;
       border-bottom: 1px solid var(--line);
     }
 
     .quote-title {
-      font-size: 17px;
+      font-size: 16px;
       color: #0d4770;
-      margin-bottom: 5px;
-      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 2px;
+      font-weight: 600;
     }
 
     .quote-line {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: baseline;
-      gap: 7px;
+      gap: 5px;
     }
 
     .quote-price {
-      font-size: 17px;
-      color: #333;
+      font-size: 15px;
+      color: #3f4348;
     }
 
     .quote-change {
-      font-size: clamp(30px, 10vw, 42px);
+      font-size: clamp(26px, 7.7vw, 30px);
       line-height: 1;
-      font-weight: 700;
+      font-weight: 650;
       text-align: center;
       font-variant-numeric: tabular-nums;
     }
 
     .quote-change small {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .quote-volume {
-      font-size: 15px;
-      color: #5e4634;
+      font-size: 14px;
+      color: #5d4a3e;
       white-space: nowrap;
     }
 
@@ -191,14 +194,15 @@
 
     .meta-strip {
       display: flex;
-      gap: 8px;
+      gap: 5px;
       overflow-x: auto;
       white-space: nowrap;
-      padding: 6px 12px;
+      padding: 3px 12px;
       background: #fff;
       border-bottom: 1px solid var(--line);
       color: #5b6571;
-      font-size: 14px;
+      font-size: 13px;
+      line-height: 1.25;
       scrollbar-width: none;
     }
 
@@ -207,8 +211,12 @@
     }
 
     .meta-strip b {
-      font-weight: 700;
+      font-weight: 600;
     }
+
+    #openPrice, #highPrice { color: var(--red); }
+    #lowPrice { color: var(--green); }
+    #refPrice { color: #454b50; }
 
     .chart-panel {
       background: #fff;
@@ -217,19 +225,21 @@
 
     #chart {
       width: 100%;
-      height: clamp(154px, 32dvh, 214px);
+      height: clamp(170px, 22dvh, 190px);
       display: block;
       background: #fff;
+      font-family: inherit;
     }
 
     .section-title {
       background: var(--blue-soft);
       color: #0a66aa;
-      font-size: 18px;
-      padding: 9px 14px;
+      font-size: 17px;
+      line-height: 1.2;
+      padding: 5px 14px;
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .event-list {
@@ -240,9 +250,9 @@
     .playback-panel {
       background: #fff;
       border-bottom: 1px solid var(--line);
-      padding: 8px 12px 9px;
+      padding: 6px 12px 7px;
       display: grid;
-      gap: 7px;
+      gap: 4px;
     }
 
     .playback-panel.hidden {
@@ -272,12 +282,12 @@
     }
 
     .playback-collapse {
-      min-height: 28px;
+      min-height: 26px;
       border-radius: 7px;
       padding: 0 9px;
       border: 1px solid #b8d6ef;
       color: var(--blue-dark);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
     }
 
@@ -285,39 +295,39 @@
       display: grid;
       grid-template-columns: 1fr auto auto;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .playback-title {
       font-weight: 800;
       color: #143f66;
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .playback-time {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       text-align: right;
       white-space: nowrap;
     }
 
     .playback-range {
       width: 100%;
-      height: 18px;
+      height: 14px;
       accent-color: var(--blue);
     }
 
     .playback-controls {
       display: grid;
-      grid-template-columns: 38px 38px 38px 1fr;
-      gap: 6px;
+      grid-template-columns: 34px 34px 34px 1fr;
+      gap: 5px;
       align-items: center;
     }
 
     .round-btn {
-      width: 38px;
-      height: 34px;
-      border-radius: 8px;
+      width: 34px;
+      height: 30px;
+      border-radius: 7px;
       border: 1px solid #b8d6ef;
       background: #f8fbff;
       color: var(--blue-dark);
@@ -334,8 +344,8 @@
 
     .speed-select {
       width: 100%;
-      height: 34px;
-      border-radius: 8px;
+      height: 30px;
+      border-radius: 7px;
       border: 1px solid var(--line);
       color: #173f64;
       padding: 0 8px;
@@ -349,59 +359,60 @@
       gap: 10px;
       padding-top: 0;
       color: #596777;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .notify-strip .secondary {
-      min-height: 30px;
+      min-height: 28px;
       border-radius: 7px;
       padding: 0 10px;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .event-row {
-      min-height: 54px;
+      min-height: 46px;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 10px;
-      padding: 8px 14px;
+      gap: 8px;
+      padding: 5px 14px;
       border-bottom: 1px solid var(--line);
     }
 
     .event-main {
-      font-size: 18px;
-      line-height: 1.25;
+      font-size: 16px;
+      line-height: 1.2;
       min-width: 0;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .event-sub {
       color: var(--muted);
-      font-size: 12px;
-      margin-top: 2px;
+      font-size: 11px;
+      margin-top: 1px;
     }
 
     .event-time {
       text-align: right;
       color: #303842;
-      font-size: 14px;
+      font-size: 13px;
       white-space: nowrap;
     }
 
     .empty {
-      padding: 26px 20px;
+      padding: 22px 18px;
       color: var(--muted);
       text-align: center;
-      line-height: 1.7;
+      font-size: 14px;
+      line-height: 1.6;
     }
 
     .panel {
       background: #fff;
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
-      margin-top: 10px;
-      padding: 15px 16px;
+      margin-top: 8px;
+      padding: 13px 14px;
     }
 
     #page-monitor .panel {
@@ -409,30 +420,30 @@
     }
 
     .panel h2 {
-      margin: 0 0 12px;
-      font-size: 19px;
-      font-weight: 700;
+      margin: 0 0 10px;
+      font-size: 17px;
+      font-weight: 600;
       color: #173f64;
     }
 
     .field {
       display: grid;
-      gap: 6px;
-      margin-bottom: 14px;
+      gap: 5px;
+      margin-bottom: 12px;
     }
 
     .field label {
       color: #596777;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .field input,
     .field select {
       width: 100%;
-      min-height: 42px;
+      min-height: 40px;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 8px 10px;
+      border-radius: 6px;
+      padding: 7px 9px;
       background: #fff;
       color: var(--text);
       outline: none;
@@ -440,7 +451,7 @@
 
     .tiny-note {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.6;
     }
 
@@ -451,22 +462,22 @@
     }
 
     .primary {
-      min-height: 44px;
+      min-height: 42px;
       width: 100%;
-      border-radius: 8px;
+      border-radius: 7px;
       background: linear-gradient(180deg, #238be3, #0d6fc6);
       color: #fff;
-      font-weight: 700;
+      font-weight: 600;
       box-shadow: var(--shadow);
     }
 
     .secondary {
-      min-height: 38px;
-      border-radius: 8px;
+      min-height: 36px;
+      border-radius: 7px;
       border: 1px solid var(--blue);
       color: var(--blue-dark);
       padding: 0 12px;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .row {
@@ -474,7 +485,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 12px 0;
+      padding: 10px 0;
       border-bottom: 1px solid var(--line);
     }
 
@@ -483,20 +494,20 @@
     }
 
     .row-title {
-      font-size: 17px;
+      font-size: 16px;
       color: #193f63;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .row-sub {
       color: var(--muted);
-      font-size: 13px;
-      margin-top: 3px;
+      font-size: 12px;
+      margin-top: 2px;
     }
 
     .switch {
-      width: 58px;
-      height: 32px;
+      width: 52px;
+      height: 28px;
       border-radius: 99px;
       background: #ccd5df;
       padding: 3px;
@@ -506,8 +517,8 @@
 
     .switch span {
       display: block;
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: #fff;
       transition: .2s;
@@ -519,7 +530,7 @@
     }
 
     .switch.on span {
-      transform: translateX(26px);
+      transform: translateX(24px);
     }
 
     .checks {
@@ -529,26 +540,26 @@
 
     .check-row {
       display: grid;
-      grid-template-columns: 1fr 58px 58px;
+      grid-template-columns: 1fr 52px 52px;
       align-items: center;
       gap: 8px;
-      min-height: 46px;
+      min-height: 42px;
       border-bottom: 1px solid var(--line);
       color: #173f64;
     }
 
     .check-row.head {
       color: #6b7480;
-      font-size: 15px;
-      min-height: 34px;
+      font-size: 14px;
+      min-height: 32px;
       border-bottom-color: #7e8b96;
     }
 
     .box {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       margin: 0 auto;
-      border-radius: 7px;
+      border-radius: 6px;
       border: 2px solid #8fc0ec;
       display: grid;
       place-items: center;
@@ -565,21 +576,21 @@
     .data-summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 12px;
+      gap: 7px;
+      margin-top: 10px;
     }
 
     .stat {
       background: var(--gray);
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 7px;
+      padding: 8px;
       text-align: center;
       border: 1px solid #e5ebf1;
     }
 
     .stat b {
       display: block;
-      font-size: 20px;
+      font-size: 18px;
       color: #123e64;
     }
 
@@ -591,11 +602,11 @@
     .day-list {
       background: #fff;
       border-top: 1px solid var(--line);
-      margin-top: 12px;
+      margin-top: 10px;
     }
 
     .day-row {
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--line);
       display: grid;
       grid-template-columns: 1fr auto;
@@ -643,19 +654,19 @@
       display: grid;
       place-items: center;
       align-content: center;
-      gap: 2px;
+      gap: 1px;
       color: #8a929b;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .tab svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
 
     .tab.active {
       color: var(--blue-dark);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .toast {
@@ -679,42 +690,48 @@
 
     @media (max-height: 740px) {
       #chart {
-        height: clamp(132px, 27dvh, 180px);
+        height: clamp(154px, 21dvh, 176px);
       }
 
       .quote {
-        padding-top: 9px;
-        padding-bottom: 7px;
+        padding-top: 7px;
+        padding-bottom: 6px;
       }
 
       .quote-title {
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .quote-change {
-        font-size: clamp(28px, 9vw, 38px);
+        font-size: clamp(27px, 8vw, 32px);
       }
 
       .playback-panel {
-        padding-top: 6px;
-        padding-bottom: 7px;
+        padding-top: 5px;
+        padding-bottom: 6px;
       }
 
       .section-title {
-        font-size: 17px;
-        padding-top: 8px;
-        padding-bottom: 8px;
+        font-size: 16px;
+        padding-top: 5px;
+        padding-bottom: 5px;
       }
     }
 
     @media (max-width: 360px) {
       .quote-line {
-        grid-template-columns: 1fr;
-        gap: 3px;
+        grid-template-columns: auto 1fr auto;
+        gap: 4px;
       }
 
       .quote-change {
-        text-align: left;
+        font-size: 26px;
+        text-align: center;
+      }
+
+      .quote-price,
+      .quote-volume {
+        font-size: 13px;
       }
 
       .playback-controls {
@@ -762,7 +779,7 @@
           <span>契約 <b id="contractName">--</b></span>
         </div>
         <div class="chart-panel">
-          <svg id="chart" viewBox="0 0 390 250" preserveAspectRatio="none"></svg>
+          <svg id="chart" viewBox="0 0 390 220" preserveAspectRatio="none"></svg>
         </div>
         <div class="playback-panel">
           <div class="playback-top">
@@ -1348,6 +1365,7 @@
 
       if (!day || !session) {
         $("lastPrice").textContent = "--";
+        $("lastPrice").className = "flat";
         $("quoteChange").textContent = "--";
         $("quoteChange").className = "quote-change flat";
         $("sessionVolume").textContent = "--";
@@ -1366,6 +1384,7 @@
       const delta = session.close - session.ref;
       const cls = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
       $("lastPrice").textContent = fmt.format(session.close);
+      $("lastPrice").className = cls;
       $("quoteChange").innerHTML = `${delta > 0 ? "▲" : delta < 0 ? "▼" : ""} ${Math.abs(delta)} <small>(${pct(delta, session.ref)})</small>`;
       $("quoteChange").className = `quote-change ${cls}`;
       $("sessionVolume").textContent = fmt.format(session.volume);
@@ -1410,8 +1429,8 @@
 
     function drawEmptyChart() {
       $("chart").innerHTML = `
-        <rect x="0" y="0" width="390" height="250" fill="#fff"></rect>
-        <text x="195" y="125" text-anchor="middle" fill="#8a96a3" font-size="15">尚無行情資料</text>
+        <rect x="0" y="0" width="390" height="220" fill="#fff"></rect>
+        <text x="195" y="110" text-anchor="middle" fill="#8a96a3" font-size="15">尚無行情資料</text>
       `;
     }
 
@@ -1447,10 +1466,10 @@
       const svg = $("chart");
       const ticks = minuteSeries(session.ticks);
       const width = 390;
-      const height = 250;
-      const pad = { top: 14, right: 34, bottom: 42, left: 8 };
-      const chartH = 152;
-      const volTop = 178;
+      const height = 220;
+      const pad = { top: 12, right: 34, bottom: 36, left: 8 };
+      const chartH = 132;
+      const volTop = 154;
       if (!ticks.length) {
         drawEmptyChart();
         return;
@@ -1480,8 +1499,8 @@
         return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="#edf1f5" stroke-width="1"/>`;
       }).join("");
       const bars = vols.map(([x, qty]) => {
-        const h = Math.max(1, (qty / maxQty) * 52);
-        return `<rect x="${x.toFixed(1)}" y="${(volTop + 52 - h).toFixed(1)}" width="1.2" height="${h.toFixed(1)}" fill="#9ca6b1"/>`;
+        const h = Math.max(1, (qty / maxQty) * 40);
+        return `<rect x="${x.toFixed(1)}" y="${(volTop + 40 - h).toFixed(1)}" width="1.2" height="${h.toFixed(1)}" fill="#9ca6b1"/>`;
       }).join("");
 
       svg.innerHTML = `
@@ -1508,8 +1527,8 @@
         <text x="${width - 4}" y="${Math.max(18, pad.top + 4)}" text-anchor="end" fill="var(--red)" font-size="14">${fmt.format(max)}</text>
         <text x="${width - 4}" y="${refY - 4}" text-anchor="end" fill="#4d5965" font-size="14">${fmt.format(session.ref)}</text>
         <text x="${width - 4}" y="${pad.top + chartH + 18}" text-anchor="end" fill="var(--green)" font-size="14">${fmt.format(min)}</text>
-        <text x="8" y="242" fill="#7c8792" font-size="13">${formatTime(ticks[0].time).slice(0, 5)}</text>
-        <text x="${width - 8}" y="242" text-anchor="end" fill="#7c8792" font-size="13">${formatTime(ticks[ticks.length - 1].time).slice(0, 5)}</text>
+        <text x="8" y="213" fill="#7c8792" font-size="13">${formatTime(ticks[0].time).slice(0, 5)}</text>
+        <text x="${width - 8}" y="213" text-anchor="end" fill="#7c8792" font-size="13">${formatTime(ticks[ticks.length - 1].time).slice(0, 5)}</text>
       `;
     }
 
